@@ -1,49 +1,23 @@
-import json
-from datetime import datetime
-from pprint import pprint
+import pytest
 
-def get_data():
-    with open('operations.json', 'r', encoding='unf-8') as file:
-        data = json.load(file)
-    return data
+from utils import get_data, get_filtered_data, get_last_values, get_formatted_data
 
-def get_filtered_data(data, filtered_empty_from):
-    data = [x for x in data if 'state' in x and x['state'] == 'EXECUTED']
-    if filtered_empty_from:
-        data = [x for x in data if 'from' in x]
-    return data
 
-def get_last_values(data, count_values):
-    data = sorted(data, key=lambda x: x['date'], reverse=True)
-    return data[:count_values]
+def test_get_data():
+    data = get_data()
+    assert isinstance(data, list)
 
-def formatted_data(data: list) -> list:
-    return_data=[]
-    for item in data:
-        date = f'{item["date"][8:10]}.{item["date"][5:7]}.{item["date"][:4]}'
-        str1 = date + ' ' + item["description"]
+def test_get_filtered_data(test_data):
+    assert len(get_filtered_data(test_data, filtered_empty_from=False)) == 3
+    assert len(get_filtered_data(test_data, filter_empty_from=True)) == 2
 
-    if 'from' in item:
-        sender = item["from"]
-        recipient = item["to"]
-        str2 = f"{format_score(sender)} -> {format_score(recipient)}"
-    else:
-        recipient = item["to"]
-        str2 = f"-> {format_score(recipient)}"
-    str3 = item["operationAmount"]["amount"] + ' ' + item["operationAmount"]["currency"]["name"]
-    return_data.append(f"""\
-{str1}
-{str2}
-{str3}
-""")
-    return return_data
+def test_get_last_values(test_data):
+    data = get_last_values(test_data, 2)
+    assert [x['date'] for x in data] == ['2019-08-26T10:50:58.294041', '2019-07-03T18:35:29.512364']
 
-def format_score(score_str: str) -> str:
-    temp_str = score_str.split()
-    if temp_str[0] == 'Счет':
-        return f'{temp_str[0]} {temp_str[1][-5:-1]}'
-    else:
-        if len(temp_str) == 2:
-            return f'{temp_str[0]} {temp_str[1][:4]} {temp_str[1][4:6]}  {temp_str[1][12:16]}'
-        if len(temp_str) == 3:
-            return f'{temp_str[0]} {temp_str[1]} {temp_str[2][:4]} {temp_str[2][4:6]}  {temp_str[2][12:16]}'
+
+def test_get_formatted_data(test_data):
+    data = get_formatted_data(test_data[:1])
+    assert data[0] == "\n26.08.2019 Перевод организации\nMaestro 1596 83** **** 5199 -> Счет **9589\n31957.58 руб."
+    data = get_formatted_data(test_data[1:2])
+    assert data[0] == "\n03.07.2019 Перевод организации\nСчет скрыт -> Счет **5560\n8221.37 USD"
