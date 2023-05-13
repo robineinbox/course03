@@ -1,23 +1,35 @@
-import pytest
+import unittest
+from utils import *
 
-from utils import get_data, get_filtered_data, get_last_values, get_formatted_data
+class TestFunctions(unittest.TestCase):
 
+    def test_get_data(self):
+        data = get_data()
+        self.assertTrue(isinstance(data, list))
+        self.assertGreater(len(data), 0)
 
-def test_get_data():
-    data = get_data()
-    assert isinstance(data, list)
+    def test_get_filtered_data(self):
+        data = [{'from': 'abc', 'to': 'def'}, {'from': '', 'to': 'ghi'}, {'from': 'jkl', 'to': ''}]
+        filtered_data = get_filtered_data(data, True)
+        self.assertEqual(len(filtered_data), 1)
+        self.assertEqual(filtered_data[0], {'from': 'abc', 'to': 'def'})
 
-def test_get_filtered_data(test_data):
-    assert len(get_filtered_data(test_data, filtered_empty_from=False)) == 3
-    assert len(get_filtered_data(test_data, filter_empty_from=True)) == 2
+    def test_get_last_values(self):
+        data = [{'date': '2022-01-01', 'value': 1}, {'date': '2022-01-02', 'value': 2},
+                {'date': '2022-01-03', 'value': 3}, {'date': '2022-01-04', 'value': 4},
+                {'date': '2022-01-05', 'value': 5}]
+        last_values = get_last_values(data, 3)
+        self.assertEqual(len(last_values), 3)
+        self.assertEqual(last_values, [{'date': '2022-01-03', 'value': 3},
+                                       {'date': '2022-01-04', 'value': 4},
+                                       {'date': '2022-01-05', 'value': 5}])
 
-def test_get_last_values(test_data):
-    data = get_last_values(test_data, 2)
-    assert [x['date'] for x in data] == ['2019-08-26T10:50:58.294041', '2019-07-03T18:35:29.512364']
+    def test_get_formated_data(self):
+        data = [{'date': '2022-01-01', 'value': 1}, {'date': '2022-01-02', 'value': 2}]
+        formated_data = get_formated_data(data)
+        self.assertEqual(len(formated_data), 2)
+        self.assertEqual(formated_data[0], '2022-01-01: 1')
+        self.assertEqual(formated_data[1], '2022-01-02: 2')
 
-
-def test_get_formatted_data(test_data):
-    data = get_formatted_data(test_data[:1])
-    assert data[0] == "\n26.08.2019 Перевод организации\nMaestro 1596 83** **** 5199 -> Счет **9589\n31957.58 руб."
-    data = get_formatted_data(test_data[1:2])
-    assert data[0] == "\n03.07.2019 Перевод организации\nСчет скрыт -> Счет **5560\n8221.37 USD"
+if __name__ == '__main__':
+    unittest.main()

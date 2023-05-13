@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-from pprint import pprint
 
 
 def get_data():
@@ -21,8 +20,8 @@ def get_last_values(data, count_values):
     return data[:count_values]
 
 
-def formatted_data(data: list) -> list:
-    return_data=[]
+def get_formated_data(data: list) -> list:
+    return_data = []
     for item in data:
         date = f'{item["date"][8:10]}.{item["date"][5:7]}.{item["date"][:4]}'
         str1 = date + ' ' + item["description"]
@@ -49,6 +48,6 @@ def format_score(score_str: str) -> str:
         return f'{temp_str[0]} {temp_str[1][-5:-1]}'
     else:
         if len(temp_str) == 2:
-            return f'{temp_str[0]} {temp_str[1][:4]} {temp_str[1][4:6]} ** {temp_str[1][12:16]}'
+            return f'{temp_str[0]} {temp_str[1][:4]} {temp_str[1][4:6]}  {temp_str[1][12:16]}'
         if len(temp_str) == 3:
-            return f'{temp_str[0]} {temp_str[1]} {temp_str[2][:4]} {temp_str[2][4:6]} ** {temp_str[2][12:16]}'
+            return f'{temp_str[0]} {temp_str[1]} {temp_str[2][:4]} {temp_str[2][4:6]}  {temp_str[2][12:16]}'
